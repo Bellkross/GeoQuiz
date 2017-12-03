@@ -26,6 +26,8 @@ public class QuizActivity extends AppCompatActivity {
             new Question(R.string.question_americas, true),
             new Question(R.string.question_asia, true),
     };
+    private float mGoodAnswers = 0;
+    private float mAnswers = 0;
     private int mCurrentIndex = 0;
 
     @Override
@@ -35,7 +37,7 @@ public class QuizActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate(Bundle) called");
 
         if (savedInstanceState != null) {
-            mCurrentIndex = savedInstanceState.getInt(KEY_INDEX,0);
+            mCurrentIndex = savedInstanceState.getInt(KEY_INDEX, 0);
         }
 
         mQuestionTextView = findViewById(R.id.question_text_view);
@@ -122,13 +124,31 @@ public class QuizActivity extends AppCompatActivity {
 
     private void checkAnswer(final boolean userPressedTrue) {
         boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
-        int messageResId = 0;
-        if (userPressedTrue == answerIsTrue) {
-            messageResId = R.string.correct_toast;
-        } else {
-            messageResId = R.string.incorrect_toast;
+        if (!mQuestionBank[mCurrentIndex].isAnswered()) {
+            int messageResId = 0;
+            if (userPressedTrue == answerIsTrue) {
+                messageResId = R.string.correct_toast;
+                ++mGoodAnswers;
+            } else {
+                messageResId = R.string.incorrect_toast;
+            }
+            Toast.makeText(this, messageResId, Toast.LENGTH_SHORT)
+                    .show();
+            mQuestionBank[mCurrentIndex].setAnswered(true);
+            if (++mAnswers == mQuestionBank.length){
+                Toast.makeText(this, "Ur result " + (mGoodAnswers/mAnswers)*100. + "%", Toast.LENGTH_SHORT)
+                        .show();
+                refresh();
+            }
         }
-        Toast.makeText(this, messageResId, Toast.LENGTH_SHORT)
-                .show();
+    }
+
+    private void refresh(){
+        mGoodAnswers = 0;
+        mAnswers = 0;
+        for (Question q:
+             mQuestionBank) {
+            q.setAnswered(false);
+        }
     }
 }
